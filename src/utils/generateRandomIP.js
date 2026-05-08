@@ -5,4 +5,4 @@ const generateRandomIP = () => {
   ).join(".");
 }
 
-export default generateRandomIP;
+export { generateRandomIP };
