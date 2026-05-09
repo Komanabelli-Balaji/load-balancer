@@ -2,39 +2,56 @@ import { describe, it, expect } from "vitest";
 import { ConsistentHashRing } from "../services/consistentHashing.js";
 
 describe("ConsistentHashRing", () => {
-  const ring = new ConsistentHashRing([
-    "Node-A",
-    "Node-B",
-    "Node-C",
-  ]);
+    const nodes = [
+      {
+        name: "Node-A",
+        healthy: true,
+        weight: 1,
+      },
+      {
+        name: "Node-B",
+        healthy: true,
+        weight: 1,
+      },
+      {
+        name: "Node-C",
+        healthy: true,
+        weight: 1,
+      },
+    ];
 
-  it("should always route same IP to same node", () => {
-    const first = ring.getNode("192.168.1.1");
-    const second = ring.getNode("192.168.1.1");
+    const ring = new ConsistentHashRing(nodes);
 
-    expect(first).toBe(second);
-  });
+    it("should route same IP to same node", () => {
+        const first = ring.getNode("192.168.1.1", nodes);
+        const second = ring.getNode("192.168.1.1", nodes);
 
-  it("should return a valid node", () => {
-    const node = ring.getNode("10.0.0.1");
+        expect(first).toBe(second);
+      }
+    );
 
-    expect([
-      "Node-A",
-      "Node-B",
-      "Node-C",
-    ]).toContain(node);
-  });
+    it("should return healthy node only", () => {
+        nodes[0].healthy = false;
+        const node = ring.getNode("192.168.1.1", nodes);
 
-  it("should still work after adding a node", () => {
-    ring.addNode("Node-D");
+        expect(node).not.toBe("Node-A");
+        nodes[0].healthy = true;
+      }
+    );
 
-    const node = ring.getNode("192.168.1.1");
+    it("should return null if all unhealthy", () => {
+        nodes.forEach(
+          (node) => (node.healthy = false)
+        );
 
-    expect([
-      "Node-A",
-      "Node-B",
-      "Node-C",
-      "Node-D",
-    ]).toContain(node);
-  });
-});
+        const result = ring.getNode("192.168.1.1", nodes);
+        expect(result).toBe(null);
+
+        nodes.forEach(
+          (node) =>
+            (node.healthy = true)
+        );
+      }
+    );
+  }
+);
