@@ -61,8 +61,13 @@ export const removeExistingNode = (nodeName) => {
     };
   }
 
+  const node = nodes[index];
+
   nodes.splice(index, 1);
-  hashRing.removeNode(nodeName);
+  hashRing.removeNode(
+    nodeName,
+    node.weight,
+  );
 
   return {
     success: true,
