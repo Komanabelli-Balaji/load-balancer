@@ -1,5 +1,14 @@
 export const nodes = [
-  "Node-A",
-  "Node-B",
-  "Node-C",
+  {
+    name: "Node-A",
+    healthy: true,
+  },
+  {
+    name: "Node-B",
+    healthy: true,
+  },
+  {
+    name: "Node-C",
+    healthy: true,
+  },
 ];
