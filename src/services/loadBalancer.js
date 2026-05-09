@@ -1,6 +1,7 @@
 import { nodes } from "../config/nodes.js";
 import { ConsistentHashRing } from "./consistentHashing.js";
 import { logRequest } from "./logger.js";
+import { incrementNodeMetric } from "./metrics.js";
 
 const hashRing = new ConsistentHashRing(nodes);
 
@@ -15,7 +16,9 @@ export const routeRequest = (ip) => {
     return null;
   }
 
+  incrementNodeMetric(selectedNode);
   logRequest(ip, selectedNode);
+  
   return selectedNode;
 }
 
