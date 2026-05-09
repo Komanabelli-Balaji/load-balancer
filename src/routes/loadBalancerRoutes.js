@@ -6,6 +6,7 @@ import {
   deleteNodeController,
   updateNodeHealthController,
   getMetricsController,
+  rateLimitingController,
 } from "../controllers/loadBalancerControllers.js";
 
 const router = express.Router();
@@ -16,5 +17,6 @@ router.post("/nodes", addNodeController);
 router.delete("/nodes/:node", deleteNodeController);
 router.patch("/nodes/:node/health", updateNodeHealthController);
 router.get("/metrics", getMetricsController);
+router.get("/route/:ip", rateLimitingController);
 
 export default router;

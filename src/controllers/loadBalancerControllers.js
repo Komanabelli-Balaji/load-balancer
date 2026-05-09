@@ -4,8 +4,10 @@ import {
   removeExistingNode,
   getAllNodes,
   updateNodeHealth,
+  routeRequest
 } from "../services/loadBalancer.js";
 import { getMetrics } from "../services/metrics.js";
+import { isRateLimited } from "../services/rateLimiter.js";
 
 export const trafficSimulatorController = (req, res) => {
   const requestCount = Number(req.query.count) || 5;
@@ -87,5 +89,29 @@ export const updateNodeHealthController = (req, res) => {
 export const getMetricsController = (req, res) => {
   res.status(200).json({
     metrics: getMetrics(),
+  });
+};
+
+export const rateLimitingController = (req, res) => {
+  const { ip } = req.params;
+
+  if (isRateLimited(ip)) {
+    return res.status(429).json({
+      message: "Rate limit exceeded",
+    });
+  }
+
+  const node = routeRequest(ip);
+
+  if (!node) {
+    return res.status(503).json({
+      message:
+        "No healthy nodes available",
+    });
+  }
+
+  res.status(200).json({
+    ip,
+    routedTo: node,
   });
 };
