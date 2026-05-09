@@ -12,7 +12,7 @@ export class ConsistentHashRing {
 
   buildRing(nodes) {
     for (const node of nodes) {
-      this.addNode(node);
+      this.addNode(node.name);
     }
   }
 
@@ -43,19 +43,47 @@ export class ConsistentHashRing {
     }
   }
 
-  getNode(ip) {
+  getNode(ip, nodes) {
     if (this.sortedHashes.length === 0) {
       return null;
     }
 
     const ipHash = generateHash(ip);
+    let startIndex = -1;
 
-    for (const hash of this.sortedHashes) {
-      if (ipHash <= hash) {
-        return this.ring.get(hash);
+    for (let i = 0; i < this.sortedHashes.length; i++) {
+      if (ipHash <= this.sortedHashes[i]) {
+        startIndex = i;
+        break;
       }
     }
 
-    return this.ring.get(this.sortedHashes[0]);
+    if (startIndex === -1) {
+      startIndex = 0;
+    }
+
+    const visitedNodes = new Set();
+
+    for (let i = 0; i < this.sortedHashes.length; i++) {
+      const index = (startIndex + i) % this.sortedHashes.length;
+      const hash = this.sortedHashes[index];
+      const nodeName = this.ring.get(hash);
+
+      if (visitedNodes.has(nodeName)) {
+        continue;
+      }
+
+      visitedNodes.add(nodeName);
+
+      const nodeData = nodes.find(
+        (node) => node.name === nodeName
+      );
+
+      if (nodeData?.healthy) {
+        return nodeName;
+      }
+    }
+
+    return null;
   }
 }

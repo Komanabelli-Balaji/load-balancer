@@ -4,32 +4,51 @@ import { logRequest } from "./logger.js";
 
 const hashRing = new ConsistentHashRing(nodes);
 
-export const routeRequest = (ip) => {
-  const selectedNode = hashRing.getNode(ip);
-  logRequest(ip, selectedNode);
+const getHealthyNodes = () => {
+  return nodes.filter((node) => node.healthy);
+}
 
+export const routeRequest = (ip) => {
+  const selectedNode = hashRing.getNode(ip, nodes);
+
+  if (!selectedNode) {
+    return null;
+  }
+
+  logRequest(ip, selectedNode);
   return selectedNode;
 }
 
-export const addNewNode = (node) => {
-  if (nodes.includes(node)) {
+export const addNewNode = (nodeName) => {
+  const exists = nodes.some(
+    (node) => node.name === nodeName
+  );
+
+  if (exists) {
     return {
       success: false,
       message: "Node already exists",
     };
   }
 
-  nodes.push(node);
-  hashRing.addNode(node);
+  const newNode = {
+    name: nodeName,
+    healthy: true,
+  };
+
+  nodes.push(newNode);
+  hashRing.addNode(nodeName);
 
   return {
     success: true,
-    message: `${node} added successfully`,
+    message: `${nodeName} added successfully`,
   };
 }
 
-export const removeExistingNode = (node) => {
-  const index = nodes.indexOf(node);
+export const removeExistingNode = (nodeName) => {
+  const index = nodes.findIndex(
+    (node) => node.name === nodeName
+  );
 
   if (index === -1) {
     return {
@@ -39,11 +58,31 @@ export const removeExistingNode = (node) => {
   }
 
   nodes.splice(index, 1);
-  hashRing.removeNode(node);
+  hashRing.removeNode(nodeName);
 
   return {
     success: true,
-    message: `${node} removed successfully`,
+    message: `${nodeName} removed successfully`,
+  };
+}
+
+export const updateNodeHealth = (nodeName, healthy) => {
+  const node = nodes.find(
+    (node) => node.name === nodeName
+  );
+
+  if (!node) {
+    return {
+      success: false,
+      message: "Node not found",
+    };
+  }
+
+  node.healthy = healthy;
+
+  return {
+    success: true,
+    message: `${nodeName} health updated`,
   };
 }
 

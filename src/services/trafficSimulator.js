@@ -6,7 +6,7 @@ const simulateTraffic = (requestCount = 5) => {
 
   for (let i = 0; i < requestCount; i++) {
     const ip = generateRandomIP();
-    const routedNode = routeRequest(ip);
+    const routedNode = routeRequest(ip) || "NO_HEALTHY_NODE";
 
     traffic.push({
       requestNumber: i + 1,
