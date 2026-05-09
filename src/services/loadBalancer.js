@@ -4,7 +4,10 @@ import { ConsistentHashRing } from "./consistentHashing.js";
 const hashRing = new ConsistentHashRing(nodes);
 
 export const routeRequest = (ip) => {
-  return hashRing.getNode(ip);
+  const selectedNode = hashRing.getNode(ip);
+  logRequest(ip, selectedNode);
+
+  return selectedNode;
 }
 
 export const addNewNode = (node) => {
