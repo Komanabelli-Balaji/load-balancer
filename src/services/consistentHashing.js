@@ -32,17 +32,24 @@ export class ConsistentHashRing {
     );
   }
 
-  removeNode(nodeToRemove) {
-    for (let i = 0; i < VIRTUAL_NODE_COUNT; i++) {
+  removeNode(nodeToRemove, weight = 1) {
+    const hashesToRemove = [];
+    const replicaCount = VIRTUAL_NODE_COUNT * weight;
+
+    for (let i = 0; i < replicaCount; i++) {
       const virtualNodeKey = `${nodeToRemove}#${i}`;
       const hash = generateHash(virtualNodeKey);
 
       this.ring.delete(hash);
-
-      this.sortedHashes = this.sortedHashes.filter(
-        (value) => value !== hash
-      );
+      hashesToRemove.push(hash);
     }
+
+    const removeSet = new Set(hashesToRemove);
+
+    this.sortedHashes =
+      this.sortedHashes.filter(
+        (hash) => !removeSet.has(hash)
+      );
   }
 
   getNode(ip, nodes) {
@@ -51,18 +58,7 @@ export class ConsistentHashRing {
     }
 
     const ipHash = generateHash(ip);
-    let startIndex = -1;
-
-    for (let i = 0; i < this.sortedHashes.length; i++) {
-      if (ipHash <= this.sortedHashes[i]) {
-        startIndex = i;
-        break;
-      }
-    }
-
-    if (startIndex === -1) {
-      startIndex = 0;
-    }
+    const startIndex = this.findNearestHashIndex(ipHash);
 
     const visitedNodes = new Set();
 
@@ -87,5 +83,27 @@ export class ConsistentHashRing {
     }
 
     return null;
+  }
+
+  findNearestHashIndex(targetHash) {
+    let left = 0;
+    let right = this.sortedHashes.length - 1;
+
+    let result = -1;
+
+    while (left <= right) {
+      const mid = Math.floor(
+        (left + right) / 2
+      );
+
+      if (this.sortedHashes[mid] >= targetHash) {
+        result = mid;
+        right = mid - 1;
+      } else {
+        left = mid + 1;
+      }
+    }
+
+    return result === -1 ? 0 : result;
   }
 }
