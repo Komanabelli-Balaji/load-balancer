@@ -19,7 +19,7 @@ export const routeRequest = (ip) => {
   return selectedNode;
 }
 
-export const addNewNode = (nodeName) => {
+export const addNewNode = (nodeName, weight = 1) => {
   const exists = nodes.some(
     (node) => node.name === nodeName
   );
@@ -34,10 +34,11 @@ export const addNewNode = (nodeName) => {
   const newNode = {
     name: nodeName,
     healthy: true,
+    weight,
   };
 
   nodes.push(newNode);
-  hashRing.addNode(nodeName);
+  hashRing.addNode(nodeName, weight);
 
   return {
     success: true,

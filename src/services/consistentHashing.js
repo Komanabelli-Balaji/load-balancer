@@ -12,12 +12,14 @@ export class ConsistentHashRing {
 
   buildRing(nodes) {
     for (const node of nodes) {
-      this.addNode(node.name);
+      this.addNode(node.name, node.weight);
     }
   }
 
-  addNode(node) {
-    for (let i = 0; i < VIRTUAL_NODE_COUNT; i++) {
+  addNode(node, weight = 1) {
+    const replicaCount = VIRTUAL_NODE_COUNT * weight;
+
+    for (let i = 0; i < replicaCount; i++) {
       const virtualNodeKey = `${node}#${i}`;
       const hash = generateHash(virtualNodeKey);
 

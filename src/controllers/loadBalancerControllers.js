@@ -23,7 +23,7 @@ export const getAllNodesController = (req, res) => {
 };
 
 export const addNodeController = (req, res) => {
-  const { node } = req.body;
+  const { node, weight = 1 } = req.body;
 
   if (!node) {
     return res.status(400).json({
@@ -31,7 +31,17 @@ export const addNodeController = (req, res) => {
     });
   }
 
-  const result = addNewNode(node);
+  if (
+    typeof weight !== "number" ||
+    weight <= 0
+  ) {
+    return res.status(400).json({
+      message:
+        "weight must be positive number",
+    });
+  }
+
+  const result = addNewNode(node, weight);
 
   if (!result.success) {
     return res.status(400).json(result);
