@@ -5,6 +5,7 @@ import {
   getAllNodes,
   updateNodeHealth,
 } from "../services/loadBalancer.js";
+import { getMetrics } from "../services/metrics.js";
 
 export const trafficSimulatorController = (req, res) => {
   const requestCount = Number(req.query.count) || 5;
@@ -81,4 +82,10 @@ export const updateNodeHealthController = (req, res) => {
   }
 
   res.status(200).json(result);
+};
+
+export const getMetricsController = (req, res) => {
+  res.status(200).json({
+    metrics: getMetrics(),
+  });
 };
