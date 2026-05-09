@@ -3,6 +3,7 @@ import {
   addNewNode,
   removeExistingNode,
   getAllNodes,
+  updateNodeHealth,
 } from "../services/loadBalancer.js";
 
 export const trafficSimulatorController = (req, res) => {
@@ -42,6 +43,28 @@ export const addNodeController = (req, res) => {
 export const deleteNodeController = (req, res) => {
   const { node } = req.params;
   const result = removeExistingNode(node);
+
+  if (!result.success) {
+    return res.status(404).json(result);
+  }
+
+  res.status(200).json(result);
+};
+
+export const updateNodeHealthController = (req, res) => {
+  const { node } = req.params;
+  const { healthy } = req.body;
+
+  if (typeof healthy !== "boolean") {
+    return res.status(400).json({
+      message: "healthy must be boolean",
+    });
+  }
+
+  const result = updateNodeHealth(
+    node,
+    healthy
+  );
 
   if (!result.success) {
     return res.status(404).json(result);
